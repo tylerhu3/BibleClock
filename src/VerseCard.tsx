@@ -1,19 +1,27 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react';
 import { Book, loadBibleData } from './BibleDB';
-interface VerseCardProps { }
+import VantaClouds from 'vanta/dist/vanta.clouds.min';
+import * as THREE from 'three';
+
+// Ensure THREE is available globally for Vanta.js
+window.THREE = THREE;
+
+interface VerseCardProps {}
 
 const VerseCard: React.FC<VerseCardProps> = () => {
-  const [verseText, setVerseText] = React.useState<string>('In the beginning God created the heavens and the earth.');
-  const [bookName, setBookName] = React.useState<string>('Genesis');
-  const [chapter, setChapter] = React.useState<string>('1');
-  const [verse, setVerse] = React.useState<string>('1');
-  const [previousTime, setPreviousTime] = React.useState<string>('x');
-  const [bibleData, setBibleData] = React.useState<Book[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [verseText, setVerseText] = useState<string>('In the beginning God created the heavens and the earth.');
+  const [bookName, setBookName] = useState<string>('Genesis');
+  const [chapter, setChapter] = useState<string>('1');
+  const [verse, setVerse] = useState<string>('1');
+  const [previousTime, setPreviousTime] = useState<string>('x');
+  const [bibleData, setBibleData] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [deviceInfo, setDeviceInfo] = useState({
     isMobile: false,
     orientation: 'portrait',
   });
+  const vantaRef = useRef<HTMLDivElement>(null);
+  const [vantaEffect, setVantaEffect] = useState<ReturnType<typeof VantaClouds2> | null>(null);
 
   const pepTalks: string[] = [
     "Trust in your purpose and let it guide you through every challenge with strength and hope.",
@@ -28,28 +36,75 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     "Challenges are opportunities to grow. Embrace them, learn from them, and become stronger for it.",
     "Take time to rest and reflect on your journey. Your efforts matter, and you are stronger than you know.",
     "Your dreams are within reach. Keep chasing them with unwavering commitment and courage.",
-    "You are enough just as you are. Live confidently, knowing your worth and embracing your unique path."
-];
+    "You are enough just as you are. Live confidently, knowing your worth and embracing your unique path"
+  ];
 
   useEffect(() => {
     const updateDeviceInfo = () => {
       const isMobile = /Mobi|Android|iP(hone|ad|od)/i.test(navigator.userAgent);
-      const orientation = window.matchMedia('(orientation: portrait)').matches
-        ? 'portrait'
-        : 'landscape';
+      const orientation = window.matchMedia('(orientation: portrait)').matches ? 'portrait' : 'landscape';
       setDeviceInfo({ isMobile, orientation });
     };
 
     updateDeviceInfo();
     window.addEventListener('resize', updateDeviceInfo);
-
-    return () => {
-      window.removeEventListener('resize', updateDeviceInfo);
-    };
+    return () => window.removeEventListener('resize', updateDeviceInfo);
   }, []);
 
-  // Load Bible data once when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!vantaRef.current) {
+      console.warn('Vanta ref is not available yet');
+      return;
+    }
+
+    if (!vantaEffect) {
+      try {
+        console.log('Initializing Vanta CLOUDS effect');
+        const effect = VantaClouds({
+          el: vantaRef.current,
+          THREE,
+          mouseControls: true,
+          touchControls: true,
+          gyroControls: false,
+          minHeight: 200.0,
+          minWidth: 200.0,
+          backgroundColor: 0xffffff, // White background
+          skyColor: 0x81b5c9,       // Light blue sky
+          cloudColor: 0xadc1de,     // Light gray clouds
+          cloudShadowColor: 0x183550,// Darker shadow
+          sunColor: 0xff9919,       // Orange sun
+          sunGlareColor: 0xff6633,  // Orange glare
+          sunlightColor: 0xff9933,   // Orange sunlight
+          speed: 1.0,               // Default speed
+        });
+        setVantaEffect(effect);
+        console.log('Vanta CLOUDS effect initialized successfully');
+
+        // Debug animation loop
+        effect.renderer.setAnimationLoop(() => {
+          console.log('Vanta animation loop running');
+          effect.renderer.render(effect.scene, effect.camera);
+        });
+      } catch (error) {
+        console.error('Vanta error:', error);
+      }
+    }
+
+    return () => {
+      if (vantaEffect) {
+        try {
+          vantaEffect.renderer.setAnimationLoop(null);
+          vantaEffect.destroy();
+          console.log('Vanta CLOUDS effect destroyed');
+          setVantaEffect(null);
+        } catch (error) {
+          console.error('Error destroying Vanta effect:', error);
+        }
+      }
+    };
+  }, [vantaRef.current, vantaEffect]);
+
+  useEffect(() => {
     const initializeBibleData = async () => {
       try {
         const data = await loadBibleData();
@@ -71,54 +126,40 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     setVerseText(pepTalks[Number(hour)]);
   }
 
-  // Update verse based on time
-  React.useEffect(() => {
+  useEffect(() => {
     if (isLoading || bibleData.length === 0) return;
-    console.log("Loading Verse 1")
     const updateVerse = () => {
       try {
         const now = new Date();
-        var currentHour = (now.getHours() == 24 || now.getHours() == 0 || now.getHours() == 12) ? 12 : now.getHours() % 12;
-        var currentMinute = now.getMinutes();
-
-        // currentHour = 1
-        // currentMinute = 0
+        const currentHour = now.getHours() === 24 || now.getHours() === 0 || now.getHours() === 12 ? 12 : now.getHours() % 12;
+        const currentMinute = now.getMinutes();
 
         const timeString = `Hour: ${currentHour} Minute:${currentMinute}`;
-        console.log("Loading Verse 2 ", timeString)
-        if (previousTime === timeString) {
-          return;
-        }
-        console.log("Loading Verse 3")
+        if (previousTime === timeString) return;
         setPreviousTime(timeString);
 
-        // Find a valid verse for the current time
         let validVerse = null;
         let attempts = 0;
         const maxAttempts = 300;
-        console.log("Loading Verse 4")
-        if (currentMinute == 0) {
-          noVerseFoundAction(currentHour.toString(), currentMinute.toString())
-          return
+        if (currentMinute === 0) {
+          noVerseFoundAction(currentHour.toString(), currentMinute.toString());
+          return;
         }
 
         while (!validVerse && attempts < maxAttempts) {
-          console.log("Loading Verse 4.1")
           const randomBookIndex = Math.floor(Math.random() * bibleData.length);
           const selectedBook = bibleData[randomBookIndex];
 
           if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
             const selectedChapter = selectedBook.chapters[currentHour];
-
             if (selectedChapter?.verses && currentMinute < selectedChapter.verses.length) {
               const selectedVerse = selectedChapter.verses[currentMinute];
-
               if (selectedVerse?.text) {
                 validVerse = {
                   book: selectedBook.book,
-                  chapter: (currentHour).toString(),
-                  verse: (currentMinute).toString(),
-                  text: selectedVerse.text
+                  chapter: currentHour.toString(),
+                  verse: currentMinute.toString(),
+                  text: selectedVerse.text,
                 };
                 break;
               }
@@ -126,14 +167,14 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           }
           attempts++;
         }
-        console.log("Loading Verse 5 ", (validVerse != null) ? validVerse.text : "null verse  ")
+
         if (validVerse) {
           setBookName(validVerse.book);
           setChapter(validVerse.chapter);
           setVerse(validVerse.verse);
           setVerseText(validVerse.text);
         } else {
-          noVerseFoundAction(currentHour.toString(), currentMinute.toString())
+          noVerseFoundAction(currentHour.toString(), currentMinute.toString());
         }
       } catch (error) {
         console.error('Error updating verse:', error);
@@ -141,53 +182,69 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     };
 
     updateVerse();
-    const interval = setInterval(updateVerse, 1000);
-
+    const interval = setInterval(updateVerse, 5000); // Reduced frequency to improve performance
     return () => clearInterval(interval);
   }, [bibleData, previousTime, isLoading]);
 
   if (isLoading) {
-    return (
-      <div className="p-4 text-center">
-        Loading Bible verses...
-      </div>
-    );
+    return <div className="p-4 text-center">Loading Bible verses...</div>;
   }
 
   return (
-    <div
+    // <div
+    //   ref={vantaRef}
+    //   style={{
+    //     display: 'flex',
+    //     justifyContent: 'center',
+    //     alignItems: 'center',
+    //     minHeight: '100vh',
+    //     width: '100vw',
+    //     position: 'fixed',
+    //     top: 0,
+    //     left: 0,
+    //     zIndex: 0,
+    //     margin: 0,
+    //     padding: 0,
+    //     overflow: 'hidden',
+    //   }}
+    // >
+    <div>
+        <div
+      ref={vantaRef}
       style={{
-        display: "flex",
-        justifyContent: "center", // Centers horizontally
-        alignItems: "center", // Centers vertically
-        minHeight: "100vh", // Full viewport height
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        width: '100vw',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 0,
         margin: 0,
-        // backgroundColor: "pink",
+        padding: 0,
+        overflow: 'hidden',
       }}
     >
-      {/* Header */}
-      {/* Top-Left Heading */}
       <h1
         style={{
-          position: "absolute", // Allows positioning at the top center
-          top: "0%", // 10px from the top
-          left: "50%", // Start from the horizontal center of the container
-          transform: "translateX(-50%)", // Adjust back by 50% of its own width
-          paddingTop: (deviceInfo.isMobile == true && deviceInfo.orientation == 'landscape') ? "0%" : "5%"  ,
-          fontSize: "1.5  rem",
-          fontWeight: "bold",
-          color: "black",
+          position: 'absolute',
+          top: '0%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          paddingTop: deviceInfo.isMobile && deviceInfo.orientation === 'landscape' ? '0%' : '5%',
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          color: 'black',
           fontFamily: '"Playwrite VN", serif',
           fontOpticalSizing: 'auto',
           fontStyle: 'normal',
-          textShadow: '2px 2px 10px white', // Adjust values for size and blur
-          overflow: 'none',   // Optional: Hide overflow if the text is too long
+          textShadow: '2px 2px 10px white',
+          zIndex: 10,
         }}
       >
         Bible Clock
       </h1>
-
-      {/* Card */}
       <div
         style={{
           backgroundColor: 'white',
@@ -195,35 +252,23 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           padding: '20px',
           boxShadow: '10px 10px 10px 10px rgba(0, 0, 0, 0.5)',
           maxWidth: '500px',
-          width: '100%', // Use full width on smaller screens
+          width: '90%',
           textAlign: 'center',
+          zIndex: 10,
+          position: 'relative',
         }}
       >
         <div style={{ color: 'black' }}>
-          <blockquote
-            style={{
-              fontSize: '1.2rem', // Slightly smaller font for better scaling
-              marginTop: '20px',
-            }}
-          >
+          <blockquote style={{ fontSize: '1.2rem', marginTop: '20px' }}>
             {verseText}
           </blockquote>
-          <p
-            style={{
-              fontSize: '1rem', // Adjust font size for smaller screens
-              textAlign: 'right',
-              fontStyle: 'italic',
-              marginRight: '10px',
-              marginTop: '5px',
-            }}
-          >
-            - <strong>  {bookName} {chapter}:{verse}</strong>
+          <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
+            - <strong>{bookName} {chapter}:{verse}</strong>
           </p>
         </div>
-      </div>
+        </div>
+        </div>
     </div>
-
-
   );
 };
 
