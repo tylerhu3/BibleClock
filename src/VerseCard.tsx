@@ -21,7 +21,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     orientation: 'portrait',
   });
   const vantaRef = useRef<HTMLDivElement>(null);
-  const [vantaEffect, setVantaEffect] = useState<ReturnType<typeof VantaClouds2> | null>(null);
+  const [vantaEffect, setVantaEffect] = useState<ReturnType<typeof VantaClouds> | null>(null);
 
   const pepTalks: string[] = [
     "Trust in your purpose and let it guide you through every challenge with strength and hope.",
