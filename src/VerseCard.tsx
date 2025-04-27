@@ -191,23 +191,6 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   }
 
   return (
-    // <div
-    //   ref={vantaRef}
-    //   style={{
-    //     display: 'flex',
-    //     justifyContent: 'center',
-    //     alignItems: 'center',
-    //     minHeight: '100vh',
-    //     width: '100vw',
-    //     position: 'fixed',
-    //     top: 0,
-    //     left: 0,
-    //     zIndex: 0,
-    //     margin: 0,
-    //     padding: 0,
-    //     overflow: 'hidden',
-    //   }}
-    // >
     <div>
         <div
       ref={vantaRef}
@@ -247,10 +230,10 @@ const VerseCard: React.FC<VerseCardProps> = () => {
       </h1>
       <div
         style={{
-          backgroundColor: 'white',
+          backgroundColor: 'rgba(255, 255, 255, 0.35)', // white with 80% opacity
           borderRadius: '16px',
           padding: '20px',
-          boxShadow: '10px 10px 10px 10px rgba(0, 0, 0, 0.5)',
+          boxShadow: '10px 10px 10px 10px rgba(0, 0, 0, 0.1)',
           maxWidth: '500px',
           width: '90%',
           textAlign: 'center',
