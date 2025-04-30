@@ -6,7 +6,7 @@ import * as THREE from 'three';
 // Ensure THREE is available globally for Vanta.js
 window.THREE = THREE;
 
-interface VerseCardProps {}
+interface VerseCardProps { }
 
 const VerseCard: React.FC<VerseCardProps> = () => {
   const [verseText, setVerseText] = useState<string>('In the beginning God created the heavens and the earth.');
@@ -209,65 +209,67 @@ const VerseCard: React.FC<VerseCardProps> = () => {
 
   return (
     <div>
-        <div
-      ref={vantaRef}
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        width: '100vw',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        zIndex: 0,
-        margin: 0,
-        padding: 0,
-        overflow: 'hidden',
-      }}
-    >
-      <h1
-        style={{
-          position: 'absolute',
-          top: '0%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          paddingTop: deviceInfo.isMobile && deviceInfo.orientation === 'landscape' ? '0%' : '5%',
-          fontSize: '1.5rem',
-          fontWeight: 'bold',
-          color: 'black',
-          fontFamily: '"Playwrite VN", serif',
-          fontOpticalSizing: 'auto',
-          fontStyle: 'normal',
-          textShadow: '2px 2px 10px white',
-          zIndex: 10,
-        }}
-      >
-        Bible Clock
-      </h1>
       <div
+        ref={vantaRef}
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.35)', // white with 80% opacity
-          borderRadius: '16px',
-          padding: '20px',
-          boxShadow: '10px 10px 10px 10px rgba(0, 0, 0, 0.1)',
-          maxWidth: '500px',
-          width: '90%',
-          textAlign: 'center',
-          zIndex: 10,
-          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          width: '100vw',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 0,
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
         }}
       >
-        <div style={{ color: 'black' }}>
-          <blockquote style={{ fontSize: '1.2rem', marginTop: '20px' }}>
-            {verseText}
-          </blockquote>
-          <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
-            - <strong>{bookName} {chapter}:{verse}</strong>
-          </p>
+        <h1
+          style={{
+            position: 'absolute',
+            top: '0%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            paddingTop: deviceInfo.isMobile && deviceInfo.orientation === 'landscape' ? '0%' : '5%',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: 'black',
+            fontFamily: '"Playwrite VN", serif',
+            fontOpticalSizing: 'auto',
+            fontStyle: 'normal',
+            textShadow: '2px 2px 10px white',
+            zIndex: 10,
+          }}
+        >
+          Bible Clock
+        </h1>
+        <div
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.35)', // white with 80% opacity
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: '10px 10px 10px 10px rgba(0, 0, 0, 0.1)',
+            maxWidth: '500px',
+            width: '90%',
+            textAlign: 'center',
+            zIndex: 10,
+            position: 'relative',
+            marginLeft: deviceInfo.isMobile ? '16px' : 'auto',
+            marginRight: deviceInfo.isMobile ? '16px' : 'auto',
+          }}
+        >
+          <div style={{ color: 'black' }}>
+            <blockquote style={{ fontSize: '1.2rem', marginTop: '20px' }}>
+              {verseText}
+            </blockquote>
+            <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
+              - <strong>{bookName} {chapter}:{verse}</strong>
+            </p>
+          </div>
         </div>
-        </div>
-        </div>
+      </div>
     </div>
   );
 };
