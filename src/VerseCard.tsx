@@ -187,7 +187,24 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   }, [bibleData, previousTime, isLoading]);
 
   if (isLoading) {
-    return <div className="p-4 text-center">Loading Bible verses...</div>;
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'white',
+          zIndex: 1000,
+        }}
+      >
+        <p style={{ fontSize: '1.2rem', color: 'black' }}>Loading Bible verses...</p>
+      </div>
+    );
   }
 
   return (
