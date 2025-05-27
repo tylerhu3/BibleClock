@@ -1,5 +1,8 @@
 
 # BibleClock
+
+Test URL: https://bibleclock.netlify.app/
+
 Generates a Bible verse base on current time. When there isn't one a pep talk will show up instead.
 
 Run locally with `npm run dev`
