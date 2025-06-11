@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, loadBibleData } from './BibleDB';
 import VantaClouds from 'vanta/dist/vanta.clouds.min';
+// import VantaClous2 from 'vanta/dist/vanta.clouds2.min';
 import * as THREE from 'three';
 
 // Ensure THREE is available globally for Vanta.js
@@ -243,7 +244,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
             zIndex: 10,
           }}
         >
-          Bible Clock
+          {bookName} {chapter}:{verse}
         </h1>
         <div
           style={{
@@ -261,12 +262,15 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           }}
         >
           <div style={{ color: 'black' }}>
-            <blockquote style={{ fontSize: '1.2rem', marginTop: '20px' }}>
+            <blockquote style={{ 
+              
+              fontSize: '1.2rem', 
+              marginTop: '20px' }}>
               {verseText}
             </blockquote>
-            <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
+            {/* <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
               - <strong>{bookName} {chapter}:{verse}</strong>
-            </p>
+            </p> */}
           </div>
         </div>
       </div>
