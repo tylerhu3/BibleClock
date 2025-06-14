@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, loadBibleData } from './BibleDB';
 import VantaClouds from 'vanta/dist/vanta.clouds.min';
-// import VantaClous2 from 'vanta/dist/vanta.clouds2.min';
+import VantaClouds2 from 'vanta/dist/vanta.clouds2.min';
 import * as THREE from 'three';
 
 // Ensure THREE is available globally for Vanta.js
@@ -40,6 +40,27 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     "You are enough just as you are. Live confidently, knowing your worth and embracing your unique path"
   ];
 
+  // Curated list of beautiful colors for sun effects
+
+  // Curated list of beautiful color sets for sun effects
+  const sunColors = [
+    { sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Default
+    { sunColor: 0xbabad1, sunGlareColor: 0xff32f4, sunlightColor: 0xf032ff }, // Pink Clouds
+    { skyColor: 0xe8bbd5, sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Pink clouds + skys
+    // { sunColor: 0xff6f61, sunGlareColor: 0xff8a80, sunlightColor: 0xffa4a0 }, // Coral tones
+    // { sunColor: 0xffa726, sunGlareColor: 0xffb851, sunlightColor: 0xffc107 }, // Orange tones
+    // { sunColor: 0xffd54f, sunGlareColor: 0xffe082, sunlightColor: 0xfff176 }, // Amber tones
+    // { sunColor: 0xffca28, sunGlareColor: 0xffe082, sunlightColor: 0xfff9c4 }, // Golden Yellow tones
+    // { sunColor: 0xff8a65, sunGlareColor: 0xffa270, sunlightColor: 0xffb791 }, // Deep Orange tones
+    // { sunColor: 0xf06292, sunGlareColor: 0xf48fb1, sunlightColor: 0xf8bbd0 }, // Pink tones
+    // { sunColor: 0xffab91, sunGlareColor: 0xffccbc, sunlightColor: 0xffe0b2 }, // Light Peach tones
+    // { sunColor: 0xffb300, sunGlareColor: 0xffca28, sunlightColor: 0xffe57f }, // Vibrant Yellow tones
+    // { sunColor: 0xd81b60, sunGlareColor: 0xf06292, sunlightColor: 0xf48fb1 }, // Deep Pink tones
+    // { sunColor: 0xf57c00, sunGlareColor: 0xff9800, sunlightColor: 0xffb300 }, // Dark Orange tones
+  ];
+
+  const getRandomColorSet = () => sunColors[Math.floor(Math.random() * sunColors.length)];
+  // Function to pick a random color from the palette
   useEffect(() => {
     const updateDeviceInfo = () => {
       const isMobile = /Mobi|Android|iP(hone|ad|od)/i.test(navigator.userAgent);
@@ -57,7 +78,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
       console.warn('Vanta ref is not available yet');
       return;
     }
-
+    var randomColor = getRandomColorSet()
     if (!vantaEffect) {
       try {
         console.log('Initializing Vanta CLOUDS effect');
@@ -70,12 +91,12 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           minHeight: 200.0,
           minWidth: 200.0,
           backgroundColor: 0xffffff, // White background
-          skyColor: 0x81b5c9,       // Light blue sky
+          skyColor: randomColor.skyColor == null ? 0x81b5c9 : randomColor.skyColor,       // Light blue sky
           cloudColor: 0xadc1de,     // Light gray clouds
           cloudShadowColor: 0x183550,// Darker shadow
-          sunColor: 0xff9919,       // Orange sun
-          sunGlareColor: 0xff6633,  // Orange glare
-          sunlightColor: 0xff9933,   // Orange sunlight
+          sunColor: randomColor.sunColor,       // Random color from palette
+          sunGlareColor: randomColor.sunGlareColor,  // Random color from palette
+          sunlightColor: randomColor.sunlightColor,  // Random color from palette
           speed: 1.0,               // Default speed
         });
         setVantaEffect(effect);
@@ -141,7 +162,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
 
         let validVerse = null;
         let attempts = 0;
-        const maxAttempts = 300;
+        const maxAttempts = 600;
         if (currentMinute === 0) {
           noVerseFoundAction(currentHour.toString(), currentMinute.toString());
           return;
@@ -244,7 +265,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
             zIndex: 10,
           }}
         >
-          {bookName} {chapter}:{verse}
+          {bookName} {chapter}:{(parseInt(verse) < 10) ? "0" + verse : verse}
         </h1>
         <div
           style={{
@@ -262,15 +283,13 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           }}
         >
           <div style={{ color: 'black' }}>
-            <blockquote style={{ 
-              
-              fontSize: '1.2rem', 
-              marginTop: '20px' }}>
+            <blockquote style={{
+
+              fontSize: '1.2rem',
+              marginTop: '20px'
+            }}>
               {verseText}
             </blockquote>
-            {/* <p style={{ fontSize: '1rem', textAlign: 'right', fontStyle: 'italic', marginRight: '10px', marginTop: '5px' }}>
-              - <strong>{bookName} {chapter}:{verse}</strong>
-            </p> */}
           </div>
         </div>
       </div>
