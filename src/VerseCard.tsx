@@ -22,7 +22,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   });
   const vantaRef = useRef<HTMLDivElement>(null);
   const [vantaEffect, setVantaEffect] = useState<ReturnType<typeof VantaClouds> | null>(null);
-
+  var randomBookIndex: number | undefined
   const pepTalks: string[] = [
     "Trust in your purpose and let it guide you through every challenge with strength and hope.",
     "You are a unique creation with boundless potential. Let your light shine as you pursue your dreams.",
@@ -168,7 +168,28 @@ const VerseCard: React.FC<VerseCardProps> = () => {
         }
 
         while (!validVerse && attempts < maxAttempts) {
-          const randomBookIndex = Math.floor(Math.random() * bibleData.length);
+          // TODO: We can make the randomBookIndex a class variable
+          // 
+          if (randomBookIndex != undefined) {
+            const selectedBook = bibleData[randomBookIndex];
+            if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
+              const selectedChapter = selectedBook.chapters[currentHour];
+              if (selectedChapter?.verses && currentMinute < selectedChapter.verses.length) {
+                const selectedVerse = selectedChapter.verses[currentMinute];
+                if (selectedVerse?.text) {
+                  validVerse = {
+                    book: selectedBook.book,
+                    chapter: currentHour.toString(),
+                    verse: currentMinute.toString(),
+                    text: selectedVerse.text,
+                  };
+                  return;
+                }
+              }
+            }
+          }
+
+          randomBookIndex = Math.floor(Math.random() * bibleData.length);
           const selectedBook = bibleData[randomBookIndex];
 
           if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
@@ -254,7 +275,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
             left: '50%',
             transform: 'translateX(-50%)',
             paddingTop: deviceInfo.isMobile && deviceInfo.orientation === 'landscape' ? '0%' : '5%',
-            fontSize: deviceInfo.isMobile ? 'clamp(1rem, 8vw, 2.5rem)' :'1.5rem',
+            fontSize: deviceInfo.isMobile ? 'clamp(1rem, 8vw, 2.5rem)' : '1.5rem',
             fontWeight: 'bold',
             color: 'black',
             fontFamily: '"Playwrite VN", serif',
