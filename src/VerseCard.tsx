@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, loadBibleData } from './BibleDB';
 import VantaClouds from 'vanta/dist/vanta.clouds.min';
-import VantaClouds2 from 'vanta/dist/vanta.clouds2.min';
 import * as THREE from 'three';
 
 // Ensure THREE is available globally for Vanta.js
@@ -45,7 +44,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   // Curated list of beautiful color sets for sun effects
   const sunColors = [
     { sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Default
-    { sunColor: 0xbabad1, sunGlareColor: 0xff32f4, sunlightColor: 0xf032ff }, // Pink Clouds
+    { skyColor: 0x838fb3, sunColor: 0xbabad1, sunGlareColor: 0xff32f4, sunlightColor: 0xf032ff }, // Pink Clouds
     { skyColor: 0xe8bbd5, sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Pink clouds + skys
     // { sunColor: 0xff6f61, sunGlareColor: 0xff8a80, sunlightColor: 0xffa4a0 }, // Coral tones
     // { sunColor: 0xffa726, sunGlareColor: 0xffb851, sunlightColor: 0xffc107 }, // Orange tones
@@ -255,7 +254,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
             left: '50%',
             transform: 'translateX(-50%)',
             paddingTop: deviceInfo.isMobile && deviceInfo.orientation === 'landscape' ? '0%' : '5%',
-            fontSize: '1.5rem',
+            fontSize: deviceInfo.isMobile ? 'clamp(1rem, 8vw, 2.5rem)' :'1.5rem',
             fontWeight: 'bold',
             color: 'black',
             fontFamily: '"Playwrite VN", serif',
@@ -263,6 +262,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
             fontStyle: 'normal',
             textShadow: '2px 2px 10px white',
             zIndex: 10,
+            width: '90%',
           }}
         >
           {bookName} {chapter}:{(parseInt(verse) < 10) ? "0" + verse : verse}
