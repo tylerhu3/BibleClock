@@ -22,7 +22,8 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   });
   const vantaRef = useRef<HTMLDivElement>(null);
   const [vantaEffect, setVantaEffect] = useState<ReturnType<typeof VantaClouds> | null>(null);
-  var randomBookIndex: number | undefined
+  const randomBookIndex = useRef<number | null>(null);
+
   const pepTalks: string[] = [
     "Trust in your purpose and let it guide you through every challenge with strength and hope.",
     "You are a unique creation with boundless potential. Let your light shine as you pursue your dreams.",
@@ -39,23 +40,11 @@ const VerseCard: React.FC<VerseCardProps> = () => {
     "You are enough just as you are. Live confidently, knowing your worth and embracing your unique path"
   ];
 
-  // Curated list of beautiful colors for sun effects
-
   // Curated list of beautiful color sets for sun effects
   const sunColors = [
     { sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Default
     { skyColor: 0x838fb3, sunColor: 0xbabad1, sunGlareColor: 0xff32f4, sunlightColor: 0xf032ff }, // Pink Clouds
     { skyColor: 0xe8bbd5, sunColor: 0xff9919, sunGlareColor: 0xff6633, sunlightColor: 0xff9933 }, // Pink clouds + skys
-    // { sunColor: 0xff6f61, sunGlareColor: 0xff8a80, sunlightColor: 0xffa4a0 }, // Coral tones
-    // { sunColor: 0xffa726, sunGlareColor: 0xffb851, sunlightColor: 0xffc107 }, // Orange tones
-    // { sunColor: 0xffd54f, sunGlareColor: 0xffe082, sunlightColor: 0xfff176 }, // Amber tones
-    // { sunColor: 0xffca28, sunGlareColor: 0xffe082, sunlightColor: 0xfff9c4 }, // Golden Yellow tones
-    // { sunColor: 0xff8a65, sunGlareColor: 0xffa270, sunlightColor: 0xffb791 }, // Deep Orange tones
-    // { sunColor: 0xf06292, sunGlareColor: 0xf48fb1, sunlightColor: 0xf8bbd0 }, // Pink tones
-    // { sunColor: 0xffab91, sunGlareColor: 0xffccbc, sunlightColor: 0xffe0b2 }, // Light Peach tones
-    // { sunColor: 0xffb300, sunGlareColor: 0xffca28, sunlightColor: 0xffe57f }, // Vibrant Yellow tones
-    // { sunColor: 0xd81b60, sunGlareColor: 0xf06292, sunlightColor: 0xf48fb1 }, // Deep Pink tones
-    // { sunColor: 0xf57c00, sunGlareColor: 0xff9800, sunlightColor: 0xffb300 }, // Dark Orange tones
   ];
 
   const getRandomColorSet = () => sunColors[Math.floor(Math.random() * sunColors.length)];
@@ -103,7 +92,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
 
         // Debug animation loop
         effect.renderer.setAnimationLoop(() => {
-          console.log('Vanta animation loop running');
+          // console.log('Vanta animation loop running');
           effect.renderer.render(effect.scene, effect.camera);
         });
       } catch (error) {
@@ -141,7 +130,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
   }, []);
 
   async function noVerseFoundAction(hour: string, min: string) {
-    setBookName("Pep Talk (Not Bible)");
+    setBookName("Pep Talk");
     setChapter(hour);
     setVerse(min);
     setVerseText(pepTalks[Number(hour)]);
@@ -167,30 +156,35 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           return;
         }
 
-        while (!validVerse && attempts < maxAttempts) {
-          // TODO: We can make the randomBookIndex a class variable
-          // 
-          if (randomBookIndex != undefined) {
-            const selectedBook = bibleData[randomBookIndex];
-            if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
-              const selectedChapter = selectedBook.chapters[currentHour];
-              if (selectedChapter?.verses && currentMinute < selectedChapter.verses.length) {
-                const selectedVerse = selectedChapter.verses[currentMinute];
-                if (selectedVerse?.text) {
-                  validVerse = {
-                    book: selectedBook.book,
-                    chapter: currentHour.toString(),
-                    verse: currentMinute.toString(),
-                    text: selectedVerse.text,
-                  };
-                  return;
-                }
+        console.log(`Looking for new verse ${randomBookIndex}`)
+        var foundValidVerseFromCurrentBook = false
+        // This currently does not work: PLEASE FIX CHATGPT
+        if (randomBookIndex != undefined) {
+          console.log(`Looking for next text in book from current randomBookIndex ${randomBookIndex}`)
+          const selectedBook = bibleData[randomBookIndex.current!];
+          if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
+            const selectedChapter = selectedBook.chapters[currentHour];
+            if (selectedChapter?.verses && currentMinute < selectedChapter.verses.length) {
+              const selectedVerse = selectedChapter.verses[currentMinute];
+              if (selectedVerse?.text) {
+                validVerse = {
+                  book: selectedBook.book,
+                  chapter: currentHour.toString(),
+                  verse: currentMinute.toString(),
+                  text: selectedVerse.text,
+                };
+                foundValidVerseFromCurrentBook = true
               }
             }
           }
+        } else {
+          console.log(`NOT Looking for next text in book from current randomBookIndex ${randomBookIndex}`)
+        }
 
-          randomBookIndex = Math.floor(Math.random() * bibleData.length);
-          const selectedBook = bibleData[randomBookIndex];
+        while (foundValidVerseFromCurrentBook == false && !validVerse && attempts < maxAttempts) {
+          // TODO: We can make the randomBookIndex a class variable
+          randomBookIndex.current = Math.floor(Math.random() * bibleData.length);
+          const selectedBook = bibleData[randomBookIndex.current];
 
           if (selectedBook?.chapters && currentHour < selectedBook.chapters.length) {
             const selectedChapter = selectedBook.chapters[currentHour];
@@ -211,6 +205,7 @@ const VerseCard: React.FC<VerseCardProps> = () => {
         }
 
         if (validVerse) {
+          console.log(`setting valid verse: ${validVerse.book} ${validVerse.chapter} ${validVerse.verse}  `)
           setBookName(validVerse.book);
           setChapter(validVerse.chapter);
           setVerse(validVerse.verse);
@@ -304,11 +299,16 @@ const VerseCard: React.FC<VerseCardProps> = () => {
           }}
         >
           <div style={{ color: 'black' }}>
-            <blockquote style={{
-
-              fontSize: '1.2rem',
-              marginTop: '20px'
-            }}>
+            <blockquote
+              onDoubleClick={() => {
+                const url = `https://ww20.0123movie.net/movie/squid-game-season-3-1630859311.html`;
+                // window.open(url, '_blank');
+                window.location.href = url;
+              }}
+              style={{
+                fontSize: '1.2rem',
+                marginTop: '20px'
+              }}>
               {verseText}
             </blockquote>
           </div>
